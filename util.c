@@ -78,21 +78,23 @@ char *random_password(char *buf, int count) {
 }
 
 const char *get_local_ip(char *buf, int size) {
-	const char *res;
+	//const char *res;
 	struct ifaddrs *ifa;
 	if (getifaddrs(&ifa)) die("getifaddrs");
 	for (; ifa != NULL; ifa = ifa->ifa_next) {
 		if (ifa->ifa_addr == NULL) continue;
 		if (ifa->ifa_addr->sa_family != AF_INET) continue;
-		if (
-			strcmp(ifa->ifa_name, "eth0") &&
-			strcmp(ifa->ifa_name, "wlan0")
-		) continue;
-		res = inet_ntop(AF_INET, ifa->ifa_addr, buf, size);
-		break;
+		if (strcmp(ifa->ifa_name, "eth0") && strcmp(ifa->ifa_name, "wlan0"))
+			continue;
+		int s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), buf, size, NULL, 0, NI_NUMERICHOST);
+		if(s == 0) {
+			fprintf(stdout, "get_local_ip[%s] = %s\n", ifa->ifa_name, buf);
+			break;
+		}
 	}
-	freeifaddrs(ifa);
-	return res;
+	fprintf(stdout, "TODO: FREE ME\n");
+//	freeifaddrs(ifa);
+	return &buf[0];
 }
 
 void tokenate(char *buf, const char *delim, ...) {
